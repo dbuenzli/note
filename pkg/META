@@ -1,0 +1,7 @@
+description = "Declarative events and signals for OCaml"
+version = "%%VERSION_NUM%%"
+requires = ""
+archive(byte) = "note.cma"
+archive(native) = "note.cmxa"
+plugin(byte) = "note.cma"
+plugin(native) = "note.cmxs"
