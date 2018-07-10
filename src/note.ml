@@ -71,6 +71,7 @@ and C : sig (* Cells *)
   val const : ?eq:('a -> 'a -> bool) -> 'a -> 'a t
   val eq : 'a t -> ('a -> 'a -> bool)
   val set_eq : 'a t -> ('a -> 'a -> bool) -> unit
+  val with_eq : ('a -> 'a -> bool) -> 'a t -> 'a t
   val stamp : 'a t -> Step.t
   val set_stamp : 'a t -> Step.t -> unit
   val srcs : 'a t -> Src_set.t
@@ -116,6 +117,7 @@ end = struct
 
   let eq c = c.eq
   let set_eq c eq = c.eq <- eq
+  let with_eq eq c = { c with eq }
   let stamp c = c.stamp
   let set_stamp c stamp = c.stamp <- stamp
   let srcs_changed c = c.srcs_changed
@@ -539,6 +541,7 @@ module S = struct
   let log = Logr.for_cell
   let obs = Logr.obs_cell
   let eq = C.eq
+  let with_eq = C.with_eq
   let create ?eq v =
     let src = Src.create ?eq v in
     let set ?step v =
@@ -554,6 +557,7 @@ module S = struct
     Src.cell src, set
 
   let value = C.up_to_date_value
+  let rough_value = C.value
   let const = C.const
   let bind v f =
     let step = Src.find_active_step Step.nil (C.srcs v) in

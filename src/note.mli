@@ -254,8 +254,15 @@ module S : sig
   val eq : 'a signal -> 'a -> 'a -> bool
   (** [eq s] is [s]'s equality function. *)
 
+  val with_eq : ('a -> 'a -> bool) -> 'a signal -> 'a signal
+  (** [with_eq eq s] is [s] with equality function [eq]. *)
+
   val value : 'a signal -> 'a
-  (** [value s] is the current value of [s]. *)
+  (** [value s] is the current value of [s], \[[s]\]{_t} *)
+
+  val rough_value : 'a signal -> 'a
+  (** [rough_value s] is the current value of [s], but in contrast to
+      {!value} it might not be exactly \[[s]\]{_t}. *)
 
   val const : ?eq:('a -> 'a -> bool) -> 'a -> 'a signal
   (** [const v] is always [v], \[[const v]\]{_t} [= v]. *)
