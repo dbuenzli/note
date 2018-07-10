@@ -206,6 +206,12 @@ module E : sig
     val some : 'a event -> 'a option event
     (** [some e] is [map (fun v -> Some v) e]. *)
 
+    val value : 'a option event -> 'a event
+    (** [value e] is [e] whenever [e] is [Some _]:
+        {ul
+        {- \[[on_some e]\]{_t} [= None] if \[[e]\]{_t} [= None]}
+        {- \[[on_some e]\]{_t} [= Some v] if \[[e]\]{_t} [= Some v]}} *)
+
     val evict : none:'a signal -> 'a option event -> 'a event
     (** [evict ~none s] is [none] when [s] is [None]:
         {ul
@@ -391,12 +397,24 @@ module S : sig
   (** Option signals *)
   module Option : sig
 
+    val eq : ('a -> 'a -> bool) -> ('a option -> 'a option -> bool)
+    (** [eq f] derives an equality function on options using [f] for
+        testing [Some _]. *)
+
     val none : 'a option signal
     (** [none] is [const None]. *)
 
     val some : 'a signal -> 'a option signal
     (** [some s] is [map (fun v -> Some v) s] and uses [s]'s equality
         function to derive the obvious one on options. *)
+
+    val hold_value : 'a -> 'a option signal -> 'a signal
+    (** [hold_value i s] is the last [Some _] value of [s] or
+        [i] if there was no such value:
+        {ul
+        {- \[[hold_some i s]\]{_t} [= i] if \[[s]\]{_<t} [= None]}
+        {- \[[hold_some i s]\]{_t} [= v] if \[[s]\]{_<=t} [= Some v]}}
+        Uses [s]'s equality on [Some _]. *)
 
     val evict : none:'a signal -> 'a option signal -> 'a signal
     (** [evict ~none s] is [none] when [s] is [None]:

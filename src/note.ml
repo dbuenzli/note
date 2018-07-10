@@ -512,6 +512,7 @@ module E = struct
 
   module Option = struct
     let some e = map (fun v -> Some v) e
+    let value e = filter_map (fun x -> x) e
     let evict ~none e =
       let update step self =
         C.update step e;
@@ -710,14 +711,25 @@ module S = struct
   end
 
   module Option = struct
+    let _eq eq = fun v0 v1 -> match v0, v1 with
+    | Some v0, Some v1 -> eq v0 v1
+    | None, None -> true
+    | _, _ -> false
+
     let none = (* XXX *) Obj.magic @@ (const None)
-    let some s =
-      let eq v0 v1 = match v0, v1 with
-      | Some v0, Some v1 -> (eq s) v0 v1
-      | None, None -> true
-      | _, _ -> false
+    let some s = map ~eq:(_eq (eq s)) (fun v -> Some v) s
+
+    let hold_value i s =
+      let update step self =
+        C.update step s;
+        if (C.srcs_changed s) then C.set_srcs self (C.srcs s);
+        match C.value s with None -> () | Some v -> C.set_value self v
       in
-      map ~eq (fun v -> Some v) s
+      let eq v v' = C.eq s (Some v) (Some v') in
+      let step = Src.find_active_step Step.nil (C.srcs s) in
+      let () = C.update step s in
+      let init = match C.value s with None -> i | Some v -> v in
+      C.create ~eq ~step ~srcs:(C.srcs s) init ~update
 
     let evict ~none s =
       let update step self =
@@ -735,6 +747,8 @@ module S = struct
       let init = match C.value s with None -> C.value none | Some v -> v in
       let srcs = Src_set.union (C.srcs none) (C.srcs s) in
       C.create ~eq:(eq none) ~step ~srcs init ~update
+
+    let eq = _eq
   end
 
   let dump_src_ids = C.dump_src_ids
