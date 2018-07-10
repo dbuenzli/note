@@ -311,6 +311,17 @@ module S : sig
   (** [app sf s] holds the value of [sf] applied to the value of [s],
       \[[app sf s]\]{_t} [=] \[[sf]\]{_t} \[[s]\]{_t}. *)
 
+  val sample :
+    ('a -> 'b -> 'c) -> on:'a event -> 'b signal -> 'c event
+  (** [sample f e s] samples [s] at [e]'s occurrences.
+      {ul
+      {- \[[sample f e s]\]{_t} [= Some (f ev sv)] if \[[e]\]{_t} [= Some ev]
+         and  \[[s]\]{_t} [= sv].}
+      {- \[[sample e s]\]{_t} [= None] otherwise.}} *)
+
+  val snapshot : on:'a event -> 'b signal -> 'b event
+  (** [snapshot ~on s] is [sample (fun _ v -> v) ~on s]. *)
+
   val delay : 'a -> 'a signal Lazy.t -> 'a signal
   (** [delay i (lazy s)] is the value [s] had an infinitesimal amount
       of time before:

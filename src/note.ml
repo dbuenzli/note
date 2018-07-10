@@ -611,6 +611,27 @@ module S = struct
     (* NB: 0 - dt doesn't exist so this is always None *)
     C.create_instant ~step ~srcs:(C.srcs s) None ~update
 
+  let sample f ~on s =
+    let update step self =
+      C.(update step on; update step s);
+      if C.(srcs_changed on || srcs_changed s)
+      then C.set_srcs self (Src_set.union (C.srcs s) (C.srcs on));
+      match C.value on with
+      | None -> ()
+      | Some v -> C.set_instant step self (Some (f v (C.value s)))
+    in
+    let step = Src.find_active_step Step.nil (C.srcs s) in
+    let step = Src.find_active_step step (C.srcs on) in
+    let () = C.(update step on; update step s) in
+    let srcs = Src_set.union (C.srcs s) (C.srcs on) in
+    let init = match C.value on with
+    | None -> None
+    | Some v -> Some (f v (C.value s))
+    in
+    C.create_instant ~step ~srcs init ~update
+
+  let snapshot ~on s = sample (fun _ v -> v) ~on s
+
   let map ?eq f v =
     let update step self =
       C.update step v;
