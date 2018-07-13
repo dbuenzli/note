@@ -424,7 +424,7 @@ module E = struct
     let init = C.value !current in
     C.create_instant ~step ~srcs init ~update
 
-  let map f e =
+  let map e f =
     let map f = function None -> None | Some v -> Some (f v) in
     let update step self =
       C.update step e;
@@ -435,7 +435,7 @@ module E = struct
     let () = C.update step e in
     C.create_instant ~step ~srcs:(C.srcs e) (map f (C.value e)) ~update
 
-  let stamp v e =
+  let stamp e v =
     let stamp = function None -> None | Some _ -> Some v in
     let update step self =
       C.update step e;
@@ -447,7 +447,7 @@ module E = struct
     let init = stamp (C.value e) in
     C.create_instant ~step ~srcs:(C.srcs e) init ~update
 
-  let filter f e =
+  let filter e f =
     let filter f = function
     | None -> None
     | Some v as occ when f v -> occ
@@ -463,7 +463,7 @@ module E = struct
     let init = filter f (C.value e) in
     C.create_instant ~step ~srcs:(C.srcs e) init ~update
 
-  let filter_map f e =
+  let filter_map e f =
     let filter_map f = function None -> None | Some v -> f v in
     let update step self =
       C.update step e;
@@ -538,8 +538,8 @@ module E = struct
   let fix ef = C.fix None ef
 
   module Option = struct
-    let some e = map (fun v -> Some v) e
-    let value e = filter_map (fun x -> x) e
+    let some e = map e (fun v -> Some v)
+    let value e = filter_map e (fun x -> x)
     let evict ~none e =
       let update step self =
         C.update step e;
@@ -638,14 +638,14 @@ module S = struct
     (* NB: 0 - dt doesn't exist so this is always None *)
     C.create_instant ~step ~srcs:(C.srcs s) None ~update
 
-  let sample f ~on s =
+  let sample s ~on f =
     let update step self =
       C.(update step on; update step s);
       if C.(srcs_changed on || srcs_changed s)
       then C.set_srcs self (Src_set.union (C.srcs s) (C.srcs on));
       match C.value on with
       | None -> ()
-      | Some v -> C.set_instant step self (Some (f v (C.value s)))
+      | Some v -> C.set_instant step self (Some (f (C.value s) v))
     in
     let step = Src.find_active_step Step.nil (C.srcs s) in
     let step = Src.find_active_step step (C.srcs on) in
@@ -653,13 +653,13 @@ module S = struct
     let srcs = Src_set.union (C.srcs s) (C.srcs on) in
     let init = match C.value on with
     | None -> None
-    | Some v -> Some (f v (C.value s))
+    | Some v -> Some (f (C.value s) v)
     in
     C.create_instant ~step ~srcs init ~update
 
-  let snapshot ~on s = sample (fun _ v -> v) ~on s
+  let snapshot s ~on = sample s ~on (fun v _ -> v)
 
-  let map ?eq f v =
+  let map ?eq v f =
     let update step self =
       C.update step v;
       if C.srcs_changed v then C.set_srcs self (C.srcs v);
@@ -713,7 +713,7 @@ module S = struct
 
   let delay = C.delay
   let fix = C.fix
-  let l1 = map
+  let l1 ?eq f x = map ?eq x f
   let l2 ?eq f x y =
     let update step self =
       C.(update step x; update step y);
@@ -733,7 +733,7 @@ module S = struct
     let eq : bool -> bool -> bool = ( = )
     let no = const false
     let yes = const true
-    let not s = map ~eq not s
+    let not s = map ~eq s not
     let ( && ) = l2 ( && )
     let ( || ) = l2 ( || )
     let edge s = changes s
@@ -774,7 +774,7 @@ module S = struct
     | _, _ -> false
 
     let none = (* XXX *) Obj.magic @@ (const None)
-    let some s = map ~eq:(_eq (eq s)) (fun v -> Some v) s
+    let some s = map ~eq:(_eq (eq s)) s (fun v -> Some v)
 
     let hold_value i s =
       let update step self =

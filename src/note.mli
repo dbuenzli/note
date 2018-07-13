@@ -141,27 +141,27 @@ module E : sig
   (** [swap es] is the current event of [es],
       \[[swap es]\]{_t} [=] \[\[[es]\]{_t}\]{_t}. *)
 
-  val map : ('a -> 'b) -> 'a event -> 'b event
-  (** [map f e] applies [f] to [e]'s occurrences.
+  val map : 'a event -> ('a -> 'b) -> 'b event
+  (** [map e f] applies [f] to [e]'s occurrences.
       {ul
-      {- \[[map f e]\]{_t} [= Some (f v)] if \[[e]\]{_t} [= Some v].}
-      {- \[[map f e]\]{_t} [= None] otherwise.}} *)
+      {- \[[map e f]\]{_t} [= Some (f v)] if \[[e]\]{_t} [= Some v].}
+      {- \[[map e f]\]{_t} [= None] otherwise.}} *)
 
-  val stamp : 'a -> 'b event -> 'a event
-  (** [stamp v e] is [map (fun _ -> v) e] *)
+  val stamp : 'b event -> 'a -> 'a event
+  (** [stamp e v] is [map e (fun _ -> v)] *)
 
-  val filter : ('a -> bool) -> 'a event -> 'a event
-  (** [filter p e] are the occurences of [e] that satisfy [p].
+  val filter : 'a event -> ('a -> bool) -> 'a event
+  (** [filter e p] are the occurences of [e] that satisfy [p].
        {ul
-       {- \[[filter p e]\]{_t} [= Some v] if \[[e]\]{_t} [= Some v] and
+       {- \[[filter e p]\]{_t} [= Some v] if \[[e]\]{_t} [= Some v] and
        [p v = true]}
-       {- \[[filter p e]\]{_t} [= None] otherwise.}} *)
+       {- \[[filter e p]\]{_t} [= None] otherwise.}} *)
 
-  val filter_map : ('a -> 'b option) -> 'a event -> 'b event
-  (** [filter_map fm e] are [e]'s occurrences filtered and mapped by [fm].
+  val filter_map : 'a event -> ('a -> 'b option) -> 'b event
+  (** [filter_map e fm] are [e]'s occurrences filtered and mapped by [fm].
       {ul
-      {- \[[filter_map fm e]\]{_t} [= Some v] if [fm] \[[e]\]{_t} [= Some v]}
-      {- \[[filter_map fm e]\]{_t} [= None] otherwise.}} *)
+      {- \[[filter_map e fm]\]{_t} [= Some v] if [fm] \[[e]\]{_t} [= Some v]}
+      {- \[[filter_map e fm]\]{_t} [= None] otherwise.}} *)
 
   val select : 'a event list -> 'a event
   (** [select el] is the occurences of every event in [el]. If more
@@ -316,25 +316,24 @@ module S : sig
       {b Warning.} By definition no event occurs if [s] changes at
       creation time ([0 - dt] is undefined). *)
 
-  val map : ?eq:('b -> 'b -> bool) -> ('a -> 'b) -> 'a signal -> 'b signal
-  (** [map f s] is [s] transformed by [f],
-      \[[map f s]\]{_t} = [f] \[[s]\]{_t}. *)
+  val map : ?eq:('b -> 'b -> bool) -> 'a signal -> ('a -> 'b) -> 'b signal
+  (** [map s f] is [s] transformed by [f],
+      \[[map s f]\]{_t} = [f] \[[s]\]{_t}. *)
 
   val app :
     ?eq:('b -> 'b -> bool) -> ('a -> 'b) signal -> 'a signal -> 'b signal
   (** [app sf s] holds the value of [sf] applied to the value of [s],
       \[[app sf s]\]{_t} [=] \[[sf]\]{_t} \[[s]\]{_t}. *)
 
-  val sample :
-    ('a -> 'b -> 'c) -> on:'a event -> 'b signal -> 'c event
-  (** [sample f e s] samples [s] at [e]'s occurrences.
+  val sample : 'b signal -> on:'a event -> ('b -> 'a -> 'c) -> 'c event
+  (** [sample s ~on f] samples [s] at [e]'s occurrences.
       {ul
-      {- \[[sample f e s]\]{_t} [= Some (f ev sv)] if \[[e]\]{_t} [= Some ev]
+      {- \[[sample s ~on f]\]{_t} [= Some (f sv ev)] if \[[on]\]{_t} [= Some ev]
          and  \[[s]\]{_t} [= sv].}
-      {- \[[sample e s]\]{_t} [= None] otherwise.}} *)
+      {- \[[sample s ~on f]\]{_t} [= None] otherwise.}} *)
 
-  val snapshot : on:'a event -> 'b signal -> 'b event
-  (** [snapshot ~on s] is [sample (fun _ v -> v) ~on s]. *)
+  val snapshot : 'b signal -> on:'a event -> 'b event
+  (** [snapshot ~on s] is [sample (fun v _ -> v) ~on s]. *)
 
 (*
   val active : on:bool signal -> 'a signal -> 'a signal
