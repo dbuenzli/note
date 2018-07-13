@@ -82,6 +82,7 @@ and C : sig (* Cells *)
   val value_changed : 'a t -> bool
   val set_value : 'a t -> 'a -> unit
   val update : Step.t -> 'a t -> unit
+  val set_update : 'a t -> (Step.t -> 'a t -> unit) -> unit
   val src_update : Step.t -> 'a t -> 'a -> bool
   val up_to_date_value : 'a t -> 'a
 
@@ -139,6 +140,7 @@ end = struct
       c.update step c
     end
 
+  let set_update c u = c.update <- u
   let src_update step c v =
     c.value_changed <- false;
     if c.eq v c.value
@@ -508,6 +510,31 @@ module E = struct
     let init = accum (C.value e) in
     C.create_instant ~step ~srcs:(C.srcs e) init ~update
 
+  let until ?(limit = false) ~next e =
+    let nop step self = () in
+    let update step self =
+      C.(update step next; update step e);
+      match C.value next with
+      | None ->
+          if C.(srcs_changed next || srcs_changed e)
+          then C.set_srcs self (Src_set.union (C.srcs next) (C.srcs e));
+          C.set_instant step self (C.value e)
+      | Some _ ->
+          C.set_srcs self Src_set.empty;
+          C.set_update self nop;
+          C.set_instant step self (if limit then C.value e else None)
+    in
+    let step = Src.find_active_step Step.nil (C.srcs next) in
+    let step = Src.find_active_step step (C.srcs e) in
+    let () = C.(update step next; update step e) in
+    match C.value next with
+    | None ->
+        let srcs = Src_set.union (C.srcs next) (C.srcs e) in
+        C.create_instant ~step ~srcs (C.value e) ~update
+    | Some _ ->
+        let init = if limit then C.value e else None in
+        C.create_instant ~step ~srcs:Src_set.empty init ~update:nop
+
   let fix ef = C.fix None ef
 
   module Option = struct
@@ -658,25 +685,34 @@ module S = struct
     C.create ?eq ~step ~srcs init ~update
 
   let accum ?eq i e = hold ?eq i (E.accum i e)
+
+  let until ?(limit = false) ?init ~next s =
+    let nop step self = () in
+    let update step self =
+      C.(update step next; update step s);
+      match C.value next with
+      | None ->
+          if C.(srcs_changed next || srcs_changed s)
+          then C.set_srcs self (Src_set.union (C.srcs next) (C.srcs s));
+          C.set_value self (C.value s)
+      | Some _ ->
+          C.set_srcs self Src_set.empty;
+          C.set_update self nop;
+          if limit then C.set_value self (C.value s) else ()
+    in
+    let step = Src.find_active_step Step.nil (C.srcs next) in
+    let step = Src.find_active_step step (C.srcs s) in
+    let () = C.(update step next; update step s) in
+    match C.value next with
+    | None ->
+        let srcs = Src_set.union (C.srcs next) (C.srcs s) in
+        C.create ~eq:(eq s) ~step ~srcs (C.value s) ~update
+    | Some _ ->
+        let init = match init with None -> C.value s | Some i -> i in
+        C.create ~eq:(eq s)  ~step ~srcs:Src_set.empty init ~update:nop
+
   let delay = C.delay
   let fix = C.fix
-
-(*
-  let active ~on s =
-    let update step self =
-      C.(update step on; update step s);
-      if C.(srcs_changed on || srcs_changed s) then
-        C.set_srcs self (Src_set.union (C.srcs on) (C.srcs s));
-      if not (C.value on) then () else C.set_value self (C.value s)
-    in
-    let step = Src.find_active_step Step.nil (C.srcs s) in
-    let step = Src.find_active_step step (C.srcs on) in
-    let () = C.update step on; C.update step s in
-    let srcs = Src_set.union (C.srcs on) (C.srcs s) in
-    let init = C.value s in
-    C.create ~eq:(C.eq s) ~step ~srcs init ~update
-*)
-
   let l1 = map
   let l2 ?eq f x y =
     let update step self =

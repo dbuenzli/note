@@ -183,6 +183,20 @@ module E : sig
          and \[[accum i e]\]{_<t} [= Some acc].}
       {- \[[accum i e]\] [= None] otherwise.}} *)
 
+  val until : ?limit:bool -> next:'a event -> 'b event -> 'b event
+  (** [until ~limit ~next e] is [e]'s occurences until [next]
+      occurs. At that point if [e] occurs simultaneously the occurence is
+      discarded ([limit] is [false], default) or kept ([limit] is [true])
+      and after this the event never occurs again.
+      {ul
+      {- \[[until ~limit ~next e]\]{_t} [=] \[[e]\]{_t}
+         if \[[next]\]{_<=t} [= None]}
+      {- \[[until ~limit:false ~next e]\]{_t} [= None]
+         if \[[next]\]{_t} [= Some _] and \[[next]\]{_<t} [= None].}
+      {- \[[until ~limit:true ~next e]\]{_t} [=] \[[e]\]{_t}
+         if \[[next]\]{_t} [= Some _] and \[[next]\]{_<t} [= None].}
+      {- \[[until ~limit ~next e]\]{_t} [= None] otherwise.}} *)
+
   val fix : ('a event -> 'a event * 'b) -> 'b
   (** [fix ef] allows to refer to the value an event had an
       infinitesimal amount of time before.
@@ -322,26 +336,6 @@ module S : sig
   val snapshot : on:'a event -> 'b signal -> 'b event
   (** [snapshot ~on s] is [sample (fun _ v -> v) ~on s]. *)
 
-  val delay : 'a -> 'a signal Lazy.t -> 'a signal
-  (** [delay i (lazy s)] is the value [s] had an infinitesimal amount
-      of time before:
-      {ul
-      {- \[[delay i (lazy s)]\]{_ t} [=] [i] for t = 0. }
-      {- \[[delay i (lazy s)]\]{_ t} [=] \[[s']\]{_t-dt} otherwise.}} *)
-
-  val accum : ?eq:('a -> 'a -> bool) -> 'a -> ('a -> 'a) event -> 'a signal
-  (** [accum i e] is [hold i (E.accum i e)]. *)
-
-  val fix : 'a -> ('a signal -> 'a signal * 'b) -> 'b
-  (** In [fix sf], [sf] is called with a signal [s] that represents
-
-      the signal returned by [sf] delayed by an infinitesimal amount
-      time. If [s', r = sf s] then [r] is returned by [fix] and [s]
-      is such that :
-      {ul
-      {- \[[s]\]{_ t} [=] [i] for t = 0. }
-      {- \[[s]\]{_ t} [=] \[[s']\]{_t-dt} otherwise.}} *)
-
 (*
   val active : on:bool signal -> 'a signal -> 'a signal
   (** [active ~on s] is has the value of [s] at creation
@@ -354,6 +348,41 @@ module S : sig
       {- \[[active ~on s]\]{_t} [=] \[[s]\]{_t'} if \[[on]\]{_t} [= false]
          where t' is the greatest 0 < t' < t with \[[on]\]{_t'} [= true].}} *)
 *)
+
+  val accum : ?eq:('a -> 'a -> bool) -> 'a -> ('a -> 'a) event -> 'a signal
+  (** [accum i e] is [hold i (E.accum i e)]. *)
+
+  val until : ?limit:bool -> ?init:'b -> next:'a event -> 'b signal -> 'b signal
+  (** [until ~limit ~init ~next s] is [s] until [next] occurs, after
+      which the value [s] had just before ([limit] is [false], default)
+      or whenever [next] occurs ([limit] is [true]) is kept forever.
+      {ul
+      {- \[[until ~limit ~init ~next s]\]{_t} [=] \[[s]\]{_t}
+         if \[[next]\]{_<=t} [= None]}
+      {- \[[until ~limit ~init ~next s]\]{_t}
+         [= init] if \[[next]\]{_0} [= Some _]}
+      {- \[[until ~limit:false ~init ~next s]\]{_t} [=] \[[s]\]{_t'- dt}
+         if \[[next]\]{_t'} [= Some _] and \[[next]\]{_<t'} [= None].}
+      {- \[[until ~limit:true ~init ~next s]\]{_t} [=] \[[s]\]{_t'}
+         if \[[next]\]{_t'} [= Some _] and \[[next]\]{_<t'} [= None].}}
+      [init] defaults to [value s]. *)
+
+  val delay : 'a -> 'a signal Lazy.t -> 'a signal
+  (** [delay i (lazy s)] is the value [s] had an infinitesimal amount
+      of time before:
+      {ul
+      {- \[[delay i (lazy s)]\]{_ t} [=] [i] for t = 0. }
+      {- \[[delay i (lazy s)]\]{_ t} [=] \[[s']\]{_t-dt} otherwise.}} *)
+
+  val fix : 'a -> ('a signal -> 'a signal * 'b) -> 'b
+  (** In [fix sf], [sf] is called with a signal [s] that represents
+
+      the signal returned by [sf] delayed by an infinitesimal amount
+      time. If [s', r = sf s] then [r] is returned by [fix] and [s]
+      is such that :
+      {ul
+      {- \[[s]\]{_ t} [=] [i] for t = 0. }
+      {- \[[s]\]{_ t} [=] \[[s']\]{_t-dt} otherwise.}} *)
 
  (** {1:lifting Lifting}
      Lifting combinators. For a given [n] the semantics is :
