@@ -236,6 +236,22 @@ module E : sig
         [none]'s equality function is used for the resulting signal. *)
   end
 
+  (** Pair events. *)
+  module Pair : sig
+    val fst : ('a * 'b) event -> 'a event
+    (** [fst e] is [map e fst]. *)
+
+    val snd : ('a * 'b) event -> 'b event
+    (** [snd e] is [map e snd]. *)
+
+    val v : 'a event -> 'b event -> ('a * 'b) event
+    (** [v e0 e1] pair simultaneous occurences of [e0] and [e1]:
+        {ul
+        {- \[[v e0 e1]\]{_t} [= Some (v0, v1)] if \[[e0]\]{_t} [= Some v0]
+           and \[[e1]\]{_t} [= Some v1]}
+        {- \[[v e0 e1]\]{_t} [= None] otherwise.}} *)
+  end
+
   (**/**)
   val dump_src_ids : Format.formatter -> 'a event -> unit
   (**/**)
@@ -461,6 +477,19 @@ module S : sig
         {- \[[evict ~none s]\]{_t} [= v] if \[[s]\]{_t} [= Some v]}
         {- \[[evict ~none s]\]{_t} [=] \[[none]\]{_t} if \[[s]\]{_t} [= None]}}
         [none]'s equality function is used for the resulting signal. *)
+  end
+
+  (** Pair signals. *)
+  module Pair : sig
+
+    val fst : ('a * 'b) signal -> 'a signal
+    (** [fst s] is [map s fst]. *)
+
+    val snd : ('a * 'b) signal -> 'b signal
+    (** [snd e] is [map e snd]. *)
+
+    val v : 'a signal -> 'b signal -> ('a * 'b) signal
+    (** [v s0 s1] is [l2 (fun x y -> (x, y) s0 s1]. *)
   end
 
   (**/**)

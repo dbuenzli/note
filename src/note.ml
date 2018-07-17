@@ -561,6 +561,30 @@ module E = struct
       C.create_instant ~step ~srcs:(C.srcs e) init ~update
   end
 
+  module Pair = struct
+    let fst e = map e fst
+    let snd e = map e snd
+    let v e0 e1 =
+      let update step self =
+        C.(update step e0; update step e1);
+        if C.(srcs_changed e0 || srcs_changed e1)
+        then C.set_srcs self (Src_set.union (C.srcs e0) (C.srcs e1));
+        let occ = match C.value e0, C.value e1 with
+        | Some v0, Some v1 -> Some (v0, v1)
+        | _ -> None
+        in
+        C.set_instant step self occ
+      in
+      let step = Src.find_active_step Step.nil (C.srcs e0) in
+      let step = Src.find_active_step step (C.srcs e1) in
+      let srcs = Src_set.union (C.srcs e0) (C.srcs e1) in
+      let init = match C.value e0, C.value e1 with
+      | Some v0, Some v1 -> Some (v0, v1)
+      | _ -> None
+      in
+      C.create_instant ~step ~srcs init ~update
+  end
+
   let dump_src_ids = C.dump_src_ids
 end
 
@@ -685,7 +709,6 @@ module S = struct
     C.create ?eq ~step ~srcs init ~update
 
   let accum ?eq i e = hold ?eq i (E.accum i e)
-
   let until ?(limit = false) ?init ~next s =
     let nop step self = () in
     let update step self =
@@ -806,6 +829,12 @@ module S = struct
       C.create ~eq:(eq none) ~step ~srcs init ~update
 
     let eq = _eq
+  end
+
+  module Pair = struct
+    let fst s = map s fst
+    let snd s = map s snd
+    let v s0 s1 = l2 (fun x y -> (x, y)) s0 s1
   end
 
   let dump_src_ids = C.dump_src_ids
