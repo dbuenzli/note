@@ -539,24 +539,24 @@ module E = struct
 
   module Option = struct
     let some e = map e (fun v -> Some v)
-    let value e = filter_map e (fun x -> x)
-    let evict ~none e =
+    let on_some e = filter_map e (fun x -> x)
+    let value e ~default =
       let update step self =
         C.update step e;
         if C.srcs_changed e then C.set_srcs self (C.srcs e);
         let occ = match C.value e with
         | None -> None
         | Some (Some _ as v) -> v
-        | Some None -> C.update step none; Some (C.value none)
+        | Some None -> C.update step default; Some (C.value default)
         in
         C.set_instant step self occ
       in
       let step = Src.find_active_step Step.nil (C.srcs e) in
-      let () = C.update step e; C.update step none in
+      let () = C.update step e; C.update step default in
       let init = match C.value e with
       | None -> None
       | Some (Some _ as v) -> v
-      | Some None -> Some (C.value none)
+      | Some None -> Some (C.value default)
       in
       C.create_instant ~step ~srcs:(C.srcs e) init ~update
   end
@@ -811,22 +811,22 @@ module S = struct
       let init = match C.value s with None -> i | Some v -> v in
       C.create ~eq ~step ~srcs:(C.srcs s) init ~update
 
-    let evict ~none s =
+    let value s ~default =
       let update step self =
-        C.update step none; C.update step s;
-        if C.(srcs_changed none || C.srcs_changed s)
-        then C.set_srcs self (Src_set.union (C.srcs none) (C.srcs s));
-        if (C.value_changed none || C.value_changed s)
+        C.update step default; C.update step s;
+        if C.(srcs_changed default || C.srcs_changed s)
+        then C.set_srcs self (Src_set.union (C.srcs default) (C.srcs s));
+        if (C.value_changed default || C.value_changed s)
         then match C.value s with
-        | None -> C.set_value self (C.value none)
+        | None -> C.set_value self (C.value default)
         | Some v -> C.set_value self v
       in
-      let step = Src.find_active_step Step.nil (C.srcs none) in
+      let step = Src.find_active_step Step.nil (C.srcs default) in
       let step = Src.find_active_step step (C.srcs s) in
-      let () = C.(update step none; update step s) in
-      let init = match C.value s with None -> C.value none | Some v -> v in
-      let srcs = Src_set.union (C.srcs none) (C.srcs s) in
-      C.create ~eq:(eq none) ~step ~srcs init ~update
+      let () = C.(update step default; update step s) in
+      let init = match C.value s with None -> C.value default | Some v -> v in
+      let srcs = Src_set.union (C.srcs default) (C.srcs s) in
+      C.create ~eq:(eq default) ~step ~srcs init ~update
 
     let eq = _eq
   end
