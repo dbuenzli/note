@@ -413,11 +413,11 @@ module S : sig
   (** Boolean signals *)
   module Bool : sig
 
-    val no : bool signal
-    (** [no] is [const false]. *)
+    val false' : bool signal
+    (** [false'] is [const false]. *)
 
-    val yes : bool signal
-    (** [yes] is [const true]. *)
+    val true' : bool signal
+    (** [true'] is [const true]. *)
 
     val not : bool signal -> bool signal
     (** [not s] is [map not s]. *)

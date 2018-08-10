@@ -754,8 +754,8 @@ module S = struct
 
   module Bool = struct
     let eq : bool -> bool -> bool = ( = )
-    let no = const false
-    let yes = const true
+    let false' = const false
+    let true' = const true
     let not s = map ~eq s not
     let ( && ) = l2 ( && )
     let ( || ) = l2 ( || )

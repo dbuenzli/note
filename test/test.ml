@@ -207,9 +207,9 @@ let test_s_bind_dyn () = (* dyn bind from react test suite *)
 let test_s_bool () =
   log "S.Bool";
   let s, set_s = S.create 0 in
-  let a_zedge = bool_occs (S.Bool.(edge no)) [] in
-  let a_zrise = unit_occs (S.Bool.(rise no)) [] in
-  let a_zfall = unit_occs (S.Bool.(fall no)) [] in
+  let a_zedge = bool_occs (S.Bool.(edge false')) [] in
+  let a_zrise = unit_occs (S.Bool.(rise false')) [] in
+  let a_zfall = unit_occs (S.Bool.(fall false')) [] in
   let a_flip_never = bool_vals (S.Bool.flip false E.never) [false] in
   let flip = S.Bool.flip true (S.changes s) in
   let a_flip = bool_vals flip [true; false; true] in
