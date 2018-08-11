@@ -100,6 +100,10 @@ module E : sig
   type 'a t = 'a event
   (** The type for events with occurences of type ['a]. *)
 
+  type 'a send = ?step:Step.t -> 'a -> unit
+  (** The type for functions sending event occurences of type ['a].
+      See {!create}. *)
+
   val obs : 'a t -> 'a option Logr.obs
   (** [obs e] is an observation for [e]'s occurences. *)
 
@@ -107,7 +111,7 @@ module E : sig
   (** [log ?now e f] is [Some (Logr.(create ?now (const f $ obs e)))]
       if [e] is not {!never} and [None] otherwise. *)
 
-  val create : unit -> 'a event * (?step:Step.t -> 'a -> unit)
+  val create : unit -> 'a event * 'a send
   (** [create ()] is a primitive event [e] and a [send] function.
       The function [send] is such that:
       {ul
@@ -268,15 +272,17 @@ module S : sig
   type 'a t = 'a signal
   (** The type for signals of type ['a]. *)
 
+  type 'a set = ?step:Step.t -> 'a -> unit
+  (** The type for functions setting signal values of type ['a].
+      See {!create}.*)
+
   val obs : 'a t -> 'a Logr.obs
   (** [obs s] is an observation for [s]. *)
 
   val log : ?now:bool -> 'a signal -> ('a -> unit) -> Logr.t
   (** [log ?now s f] is [Logr.(create ~now (const f $ obs s))]. *)
 
-  val create :
-    ?eq:('a -> 'a -> bool) -> 'a ->
-    'a signal * (?step:Step.t -> 'a -> unit)
+  val create : ?eq:('a -> 'a -> bool) -> 'a -> 'a signal * 'a set
   (** [create v] is a primitive signal set to the value [v] and a
       [set] function. The function [set] is such that:
       {ul

@@ -353,6 +353,8 @@ type 'a event = 'a option C.t
 
 module E = struct
   type 'a t = 'a event
+  type 'a send = ?step:Step.t -> 'a -> unit
+
   let obs = Logr.obs_cell
   let log ?now e f =
     let wrap = function None -> () | Some v -> f v in
@@ -590,6 +592,8 @@ end
 
 module S = struct
   type 'a t = 'a signal
+  type 'a set = ?step:Step.t -> 'a -> unit
+
   let log = Logr.for_cell
   let obs = Logr.obs_cell
   let eq = C.eq
