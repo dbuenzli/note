@@ -685,6 +685,7 @@ module S = struct
     in
     C.create_instant ~step ~srcs init ~update
 
+  let sample_filter s ~on f = E.Option.on_some (sample s ~on f)
   let snapshot s ~on = sample s ~on (fun v _ -> v)
 
   let map ?eq v f =
@@ -754,6 +755,25 @@ module S = struct
     let () = C.(update step x; update step y) in
     let srcs = Srcs.union (C.srcs x) (C.srcs y) in
     let init = f (C.value x) (C.value y) in
+    C.create ?eq ~step ~srcs init ~update
+
+  let l3 ?eq f x y z =
+    let srcs_union x y z =
+      Srcs.union (C.srcs x) (Srcs.union (C.srcs y) (C.srcs z))
+    in
+    let update step self =
+      C.(update step x; update step y; update step z);
+      if C.(srcs_changed x || srcs_changed y || srcs_changed z)
+      then C.set_srcs self (srcs_union x y z);
+      if C.(value_changed x || value_changed y || value_changed z)
+      then C.set_value self (f (C.value x) (C.value y) (C.value z))
+    in
+    let step = Src.find_active_step Step.nil (C.srcs x) in
+    let step = Src.find_active_step step (C.srcs y) in
+    let step = Src.find_active_step step (C.srcs z) in
+    let () = C.(update step x; update step y; update step z) in
+    let srcs = srcs_union x y z in
+    let init = f (C.value x) (C.value y) (C.value z) in
     C.create ?eq ~step ~srcs init ~update
 
   module Bool = struct

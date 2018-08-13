@@ -354,6 +354,10 @@ module S : sig
          and  \[[s]\]{_t} [= sv].}
       {- \[[sample s ~on f]\]{_t} [= None] otherwise.}} *)
 
+  val sample_filter :
+    'b signal -> on:'a event -> ('b -> 'a -> 'c option) -> 'c event
+  (** [sample_filter s on f] is [E.Option.on_some (sample s ~on f)]. *)
+
   val snapshot : 'b signal -> on:'a event -> 'b event
   (** [snapshot ~on s] is [sample (fun v _ -> v) ~on s]. *)
 
@@ -413,6 +417,9 @@ module S : sig
   val l2 :
     ?eq:('c -> 'c -> bool) -> ('a -> 'b -> 'c) -> 'a signal -> 'b signal ->
     'c signal
+  val l3 :
+    ?eq:('d -> 'd -> bool) -> ('a -> 'b -> 'c -> 'd) -> 'a signal ->
+    'b signal -> 'c signal -> 'd signal
 
   (** {1:stdlib Stdlib types support} *)
 
