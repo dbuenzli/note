@@ -426,7 +426,7 @@ module E = struct
     let init = C.value !current in
     C.create_instant ~step ~srcs init ~update
 
-  let map e f =
+  let map f e =
     let map f = function None -> None | Some v -> Some (f v) in
     let update step self =
       C.update step e;
@@ -449,7 +449,7 @@ module E = struct
     let init = stamp (C.value e) in
     C.create_instant ~step ~srcs:(C.srcs e) init ~update
 
-  let filter e f =
+  let filter f e =
     let filter f = function
     | None -> None
     | Some v as occ when f v -> occ
@@ -465,7 +465,7 @@ module E = struct
     let init = filter f (C.value e) in
     C.create_instant ~step ~srcs:(C.srcs e) init ~update
 
-  let filter_map e f =
+  let filter_map f e =
     let filter_map f = function None -> None | Some v -> f v in
     let update step self =
       C.update step e;
@@ -540,8 +540,8 @@ module E = struct
   let fix ef = C.fix None ef
 
   module Option = struct
-    let some e = map e (fun v -> Some v)
-    let on_some e = filter_map e (fun x -> x)
+    let some e = map (fun v -> Some v) e
+    let on_some e = filter_map (fun x -> x) e
     let value e ~default =
       let update step self =
         C.update step e;
@@ -564,8 +564,8 @@ module E = struct
   end
 
   module Pair = struct
-    let fst e = map e fst
-    let snd e = map e snd
+    let fst e = map fst e
+    let snd e = map snd e
     let v e0 e1 =
       let update step self =
         C.(update step e0; update step e1);
@@ -688,7 +688,7 @@ module S = struct
   let sample_filter s ~on f = E.Option.on_some (sample s ~on f)
   let snapshot s ~on = sample s ~on (fun v _ -> v)
 
-  let map ?eq v f =
+  let map ?eq f v =
     let update step self =
       C.update step v;
       if C.srcs_changed v then C.set_srcs self (C.srcs v);
@@ -741,7 +741,7 @@ module S = struct
 
   let delay = C.delay
   let fix = C.fix
-  let l1 ?eq f x = map ?eq x f
+  let l1 ?eq f x = map ?eq f x
   let l2 ?eq f x y =
     let update step self =
       C.(update step x; update step y);
@@ -780,7 +780,7 @@ module S = struct
     let eq : bool -> bool -> bool = ( = )
     let false' = const false
     let true' = const true
-    let not s = map ~eq s not
+    let not s = map ~eq not s
     let ( && ) = l2 ( && )
     let ( || ) = l2 ( || )
     let edge s = changes s
@@ -821,7 +821,7 @@ module S = struct
     | _, _ -> false
 
     let none = (* XXX *) Obj.magic @@ (const None)
-    let some s = map ~eq:(_eq (eq s)) s (fun v -> Some v)
+    let some s = map ~eq:(_eq (eq s)) (fun v -> Some v) s
 
     let hold_value i s =
       let update step self =
@@ -856,8 +856,8 @@ module S = struct
   end
 
   module Pair = struct
-    let fst s = map s fst
-    let snd s = map s snd
+    let fst s = map fst s
+    let snd s = map snd s
     let v s0 s1 = l2 (fun x y -> (x, y)) s0 s1
   end
 

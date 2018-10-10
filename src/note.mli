@@ -145,27 +145,27 @@ module E : sig
   (** [swap es] is the current event of [es],
       \[[swap es]\]{_t} [=] \[\[[es]\]{_t}\]{_t}. *)
 
-  val map : 'a event -> ('a -> 'b) -> 'b event
-  (** [map e f] applies [f] to [e]'s occurrences.
+  val map : ('a -> 'b) -> 'a event -> 'b event
+  (** [map f e] applies [f] to [e]'s occurrences.
       {ul
-      {- \[[map e f]\]{_t} [= Some (f v)] if \[[e]\]{_t} [= Some v].}
-      {- \[[map e f]\]{_t} [= None] otherwise.}} *)
+      {- \[[map f e]\]{_t} [= Some (f v)] if \[[e]\]{_t} [= Some v].}
+      {- \[[map f e]\]{_t} [= None] otherwise.}} *)
 
   val stamp : 'b event -> 'a -> 'a event
   (** [stamp e v] is [map e (fun _ -> v)] *)
 
-  val filter : 'a event -> ('a -> bool) -> 'a event
-  (** [filter e p] are the occurences of [e] that satisfy [p].
+  val filter : ('a -> bool) -> 'a event -> 'a event
+  (** [filter p e] are the occurences of [e] that satisfy [p].
        {ul
-       {- \[[filter e p]\]{_t} [= Some v] if \[[e]\]{_t} [= Some v] and
+       {- \[[filter p e]\]{_t} [= Some v] if \[[e]\]{_t} [= Some v] and
        [p v = true]}
-       {- \[[filter e p]\]{_t} [= None] otherwise.}} *)
+       {- \[[filter p e]\]{_t} [= None] otherwise.}} *)
 
-  val filter_map : 'a event -> ('a -> 'b option) -> 'b event
-  (** [filter_map e fm] are [e]'s occurrences filtered and mapped by [fm].
+  val filter_map : ('a -> 'b option) -> 'a event -> 'b event
+  (** [filter_map fm e] are [e]'s occurrences filtered and mapped by [fm].
       {ul
-      {- \[[filter_map e fm]\]{_t} [= Some v] if [fm] \[[e]\]{_t} [= Some v]}
-      {- \[[filter_map e fm]\]{_t} [= None] otherwise.}} *)
+      {- \[[filter_map fm e]\]{_t} [= Some v] if [fm] \[[e]\]{_t} [= Some v]}
+      {- \[[filter_map fm e]\]{_t} [= None] otherwise.}} *)
 
   val select : 'a event list -> 'a event
   (** [select el] is the occurences of every event in [el]. If more
@@ -243,10 +243,10 @@ module E : sig
   (** Pair events. *)
   module Pair : sig
     val fst : ('a * 'b) event -> 'a event
-    (** [fst e] is [map e fst]. *)
+    (** [fst e] is [map fst e]. *)
 
     val snd : ('a * 'b) event -> 'b event
-    (** [snd e] is [map e snd]. *)
+    (** [snd e] is [map snd e]. *)
 
     val v : 'a event -> 'b event -> ('a * 'b) event
     (** [v e0 e1] pair simultaneous occurences of [e0] and [e1]:
@@ -338,9 +338,9 @@ module S : sig
       {b Warning.} By definition no event occurs if [s] changes at
       creation time ([0 - dt] is undefined). *)
 
-  val map : ?eq:('b -> 'b -> bool) -> 'a signal -> ('a -> 'b) -> 'b signal
-  (** [map s f] is [s] transformed by [f],
-      \[[map s f]\]{_t} = [f] \[[s]\]{_t}. *)
+  val map : ?eq:('b -> 'b -> bool) -> ('a -> 'b) -> 'a signal -> 'b signal
+  (** [map f s] is [s] transformed by [f],
+      \[[map f s]\]{_t} = [f] \[[s]\]{_t}. *)
 
   val app :
     ?eq:('b -> 'b -> bool) -> ('a -> 'b) signal -> 'a signal -> 'b signal
@@ -497,10 +497,10 @@ module S : sig
   module Pair : sig
 
     val fst : ('a * 'b) signal -> 'a signal
-    (** [fst s] is [map s fst]. *)
+    (** [fst s] is [map fst s]. *)
 
     val snd : ('a * 'b) signal -> 'b signal
-    (** [snd e] is [map e snd]. *)
+    (** [snd e] is [map snd e]. *)
 
     val v : 'a signal -> 'b signal -> ('a * 'b) signal
     (** [v s0 s1] is [l2 (fun x y -> (x, y) s0 s1]. *)

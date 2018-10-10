@@ -71,7 +71,7 @@ let test_e_map () =
   let x, send_x = E.create () in
   let occs = [1;2;2;3;3;3] in
   let twice = ( * ) 2 in
-  let y = E.map x twice in
+  let y = E.map twice x in
   let assert_twice = int_occs y (List.map twice occs) in
   List.iter send_x occs;
   List.iter empty [assert_twice];
@@ -82,8 +82,8 @@ let test_e_swap () =
   let x, send_x = E.create () in
   let y, send_y = E.create () in
   let s, set_x = S.create 0 in
-  let es = S.map ~eq:( == ) s @@ function
-  | 0 -> E.map x (fun x -> x)
+  let es = s |> S.map ~eq:( == ) @@ function
+  | 0 -> E.map (fun x -> x) x
   | 1 -> y
   | _ -> assert false
   in
@@ -116,7 +116,7 @@ let test_s_hold () =
 let test_s_map () =
   log "S.map";
   let x, set_x = S.create 1 in
-  let twice = S.map x (fun x -> 2 * x) in
+  let twice = S.map (fun x -> 2 * x) x in
   let assert_twice = int_vals twice [2;4;6;4;6] in
   List.iter set_x [2;2;2;3;2;3;3];
   List.iter empty [assert_twice];
@@ -140,7 +140,7 @@ let test_s_bind () =
   ()
 
 let high_s s =
-  let id s = S.map s (fun v -> v) in (id (id (id (id (id (id (id (id s))))))))
+  let id s = S.map (fun v -> v) s in (id (id (id (id (id (id (id (id s))))))))
 
 let test_s_changes () =
   log "S.changes";
@@ -155,7 +155,7 @@ let test_s_changes () =
     assert_dc := int_occs dc [4];
     assert_dhc := int_occs dhc [4]
   in
-  let create_dyn = S.map s (fun v -> if v = 3 then dyn ()) in
+  let create_dyn = S.map (fun v -> if v = 3 then dyn ()) s in
   let log_dyn = S.log create_dyn (fun _ -> ()) in
   let assert_c = int_occs c [3; 4] in
   List.iter send_e [1; 1; 3; 3; 4; 4];
@@ -168,10 +168,10 @@ let test_s_init_dyn () =
   log "S dynamic creation initialization";
   let s0, set_s0 = S.create 0 in
   let s1, set_s1 = S.create 1 in
-  let m0 = S.map s0 (fun x -> x + 1) in
-  let m1 = S.map s1 (fun x -> x + 1) in
-  let dyn0 = function _ -> S.map m1 (fun x -> x + 1) (* !! *)  in
-  let dyn1 = function _ -> S.map m0 (fun x -> x + 1) (* !! *) in
+  let m0 = S.map (fun x -> x + 1) s0 in
+  let m1 = S.map (fun x -> x + 1) s1 in
+  let dyn0 = function _ -> S.map (fun x -> x + 1) m1 (* !! *)  in
+  let dyn1 = function _ -> S.map (fun x -> x + 1) m0 (* !! *) in
   let d0 = S.bind s0 dyn0 in
   let d1 = S.bind s1 dyn1 in
   let assert_d0 = int_vals d0 [3;8] in
@@ -266,7 +266,7 @@ let test_s_fix () =
   in
   let s, set_s = S.create 0 in
   let h_dt, h = history s in
-  let incd = S.map h_dt (fun l -> List.map (( + ) 1) l) in
+  let incd = S.map (fun l -> List.map (( + ) 1) l) h_dt in
   let assert_h = int_list_vals h [[0]; [1;0]; [2;1;0]; [3;2;1;0]] in
   let assert_incd = int_list_vals incd [[1]; [2;1]; [3;2;1]; [4;3;2;1]] in
   List.iter set_s [1;1;2;2;3];
@@ -277,8 +277,8 @@ let test_s_fix_2 () =
   log "S.fix";
   let pairs s =
     let def v =
-      let t = S.map v (fun v -> v * 2) in
-      let v = S.map v (fun v -> v) in
+      let t = S.map (fun v -> v * 2) v in
+      let v = S.map (fun v -> v) v in
       let v' = S.l2 (fun _ v -> if v mod 2 = 0 then v else v + 1) v s in
       v', (t, v')
     in
@@ -303,7 +303,7 @@ let test_observation () =
       obs := List.tl !obs
     in
     let s, set_s = S.create 0 in
-    let e = E.filter (S.changes s) (( = ) 1) in
+    let e = E.filter (( = ) 1) (S.changes s) in
     let log = Logr.(create ~now (const assert_obs $ E.obs e $ S.obs s)) in
     List.iter set_s [1;2;2];
     assert (!obs = []);
