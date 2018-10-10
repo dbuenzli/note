@@ -561,6 +561,10 @@ module E = struct
       | Some None -> Some (C.value default)
       in
       C.create_instant ~step ~srcs:(C.srcs e) init ~update
+
+    let bind e f =
+      let bind f = function None -> None | Some v -> f v in
+      map (bind f) e
   end
 
   module Pair = struct
@@ -851,6 +855,10 @@ module S = struct
       let init = match C.value s with None -> C.value default | Some v -> v in
       let srcs = Srcs.union (C.srcs default) (C.srcs s) in
       C.create ~eq:(eq default) ~step ~srcs init ~update
+
+    let bind s f =
+      let bind f = function None -> None | Some v -> f v in
+      map (bind f) s
 
     let eq = _eq
   end

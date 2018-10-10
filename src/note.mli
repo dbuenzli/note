@@ -238,6 +238,9 @@ module E : sig
            if \[[e]\]{_t} [= Some (Some v)]}
         {- \[[value e ~default]\]{_t} [=] \[[default]\]{_t} if \[[e]\]{_t}
             [= Some None]}} *)
+
+    val bind : 'a option event -> ('a -> 'b option) -> 'b option event
+    (** [bind s f] is [map (fun v -> Option.bind v f) e]. *)
   end
 
   (** Pair events. *)
@@ -483,6 +486,9 @@ module S : sig
         {- \[[value s ~default]\]{_t} [=]
            \[[default]\]{_t} if \[[s]\]{_t} [= None]}}
         [default]'s equality function is used for the resulting signal. *)
+
+    val bind : 'a option signal -> ('a -> 'b option) -> 'b option signal
+    (** [bind s f] is [map (fun v -> Option.bind v f) s]. *)
 
     val hold_value : 'a -> 'a option signal -> 'a signal
     (** [hold_value i s] is the last [Some _] value of [s] or
