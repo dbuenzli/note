@@ -540,8 +540,8 @@ module E = struct
   let fix ef = C.fix None ef
 
   module Option = struct
-    let some e = map (fun v -> Some v) e
     let on_some e = filter_map (fun x -> x) e
+    let some e = map (fun v -> Some v) e
     let value e ~default =
       let update step self =
         C.update step e;
@@ -562,10 +562,13 @@ module E = struct
       in
       C.create_instant ~step ~srcs:(C.srcs e) init ~update
 
-    let bind e f =
-      let bind f = function None -> None | Some v -> f v in
-      map (bind f) e
+    let get e =
+      map (function Some v -> v | None -> invalid_arg "option is None") e
 
+    let bind e f = map (function None -> None | Some v -> f v) e
+    let join e = map (function Some (Some _ as o) -> o | _ -> None) e
+    let is_none e = map (function None -> true | Some _ -> false) e
+    let is_some e = map (function None -> false | Some _ -> true) e
     let map f e = map (function None -> None | Some v -> Some (f v)) e
   end
 
@@ -858,11 +861,14 @@ module S = struct
       let srcs = Srcs.union (C.srcs default) (C.srcs s) in
       C.create ~eq:(eq default) ~step ~srcs init ~update
 
-    let bind s f =
-      let bind f = function None -> None | Some v -> f v in
-      map (bind f) s
+    let get ?eq s =
+      map ?eq (function Some v -> v | None -> invalid_arg "option is None") s
 
-    let map f s = map (function None -> None | Some v -> Some (f v)) s
+    let bind ?eq s f = map ?eq (function None -> None | Some v -> f v) s
+    let join ?eq s = map ?eq (function Some (Some _ as o) -> o | _ -> None) s
+    let is_none s = map ~eq:Bool.eq (function None -> true | Some _ -> false) s
+    let is_some s = map ~eq:Bool.eq (function None -> false | Some _ -> true) s
+    let map ?eq f s = map ?eq (function None -> None | Some v -> Some (f v)) s
     let eq = _eq
   end
 

@@ -221,14 +221,16 @@ module E : sig
   (** Option events *)
   module Option : sig
 
-    val some : 'a event -> 'a option event
-    (** [some e] is [map (fun v -> Some v) e]. *)
-
     val on_some : 'a option event -> 'a event
     (** [on_some e] is [e] when [Some _] occurs:
         {ul
         {- \[[on_some e]\]{_t} [= Some v] if \[[e]\]{_t} [= Some (Some v)]}
         {- \[[on_some e]\]{_t} [= None] otherwise.}} *)
+
+    (** {1:lift Lifted {!Stdlib.Option} module} *)
+
+    val some : 'a event -> 'a option event
+    (** [some e] is [map (fun v -> Some v) e]. *)
 
     val value : 'a option event -> default:'a signal -> 'a event
     (** [value e default] is [default] when [e] occurs with [None]:
@@ -239,11 +241,23 @@ module E : sig
         {- \[[value e ~default]\]{_t} [=] \[[default]\]{_t} if \[[e]\]{_t}
             [= Some None]}} *)
 
-    val map : ('a -> 'b) -> 'a option event -> 'b option event
-    (** [map f e] is [map Option.map e]. *)
+    val get : 'a option event -> 'a event
+    (** [get e] is [map get e]. *)
 
     val bind : 'a option event -> ('a -> 'b option) -> 'b option event
     (** [bind e f] is [map (fun v -> Option.bind v f) e]. *)
+
+    val join : 'a option option event -> 'a option event
+    (** [join e] is [map Option.join e]. *)
+
+    val map : ('a -> 'b) -> 'a option event -> 'b option event
+    (** [map f e] is [map Option.map e]. *)
+
+    val is_none : 'a option event -> bool event
+    (** [is_none e] is [map is_none e]. *)
+
+    val is_some : 'a option event -> bool event
+    (** [is_some e] is [map is_some e]. *)
   end
 
   (** Pair events. *)
@@ -475,6 +489,16 @@ module S : sig
     (** [eq f] derives an equality function on options using [f] for
         testing [Some _]. *)
 
+    val hold_value : 'a -> 'a option signal -> 'a signal
+    (** [hold_value i s] is the last [Some _] value of [s] or
+        [i] if there was no such value:
+        {ul
+        {- \[[hold_some i s]\]{_t} [= i] if \[[s]\]{_<t} [= None]}
+        {- \[[hold_some i s]\]{_t} [= v] if \[[s]\]{_<=t} [= Some v]}}
+        Uses [s]'s equality on [Some _]. *)
+
+    (** {1:lift Lifted {!Stdlib.Option} module} *)
+
     val none : 'a option signal
     (** [none] is [const None]. *)
 
@@ -490,19 +514,29 @@ module S : sig
            \[[default]\]{_t} if \[[s]\]{_t} [= None]}}
         [default]'s equality function is used for the resulting signal. *)
 
-    val map : ('a -> 'b) -> 'a option signal -> 'b option signal
-    (** [map f s] is [map Option.map s]. *)
+    val get : ?eq:('a -> 'a -> bool) -> 'a option signal -> 'a signal
+    (** [get s] is [map ~eq Option.get s]. *)
 
-    val bind : 'a option signal -> ('a -> 'b option) -> 'b option signal
-    (** [bind s f] is [map (fun v -> Option.bind v f) s]. *)
+    val bind :
+      ?eq:('b option -> 'b option -> bool) -> 'a option signal ->
+      ('a -> 'b option) -> 'b option signal
+    (** [bind ~eq s f] is [map ~eq (fun v -> Option.bind v f) s]. *)
 
-    val hold_value : 'a -> 'a option signal -> 'a signal
-    (** [hold_value i s] is the last [Some _] value of [s] or
-        [i] if there was no such value:
-        {ul
-        {- \[[hold_some i s]\]{_t} [= i] if \[[s]\]{_<t} [= None]}
-        {- \[[hold_some i s]\]{_t} [= v] if \[[s]\]{_<=t} [= Some v]}}
-        Uses [s]'s equality on [Some _]. *)
+    val join :
+      ?eq:('a option -> 'a option -> bool) -> 'a option option signal ->
+      'a option signal
+    (** [join ~eq oos] is [map ~eq Option.join oos]. *)
+
+    val map :
+      ?eq:('b option -> 'b option -> bool) -> ('a -> 'b) ->
+      'a option signal -> 'b option signal
+    (** [map ~eq f s] is [map ~eq Option.map s]. *)
+
+    val is_none : 'a option signal -> bool signal
+    (** [is_none s] is [map Option.is_none s]. *)
+
+    val is_some : 'a option signal -> bool signal
+    (** [is_some s] is [map Option.is_some s]. *)
   end
 
   (** Pair signals. *)
