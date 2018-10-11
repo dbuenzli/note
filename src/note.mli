@@ -239,8 +239,11 @@ module E : sig
         {- \[[value e ~default]\]{_t} [=] \[[default]\]{_t} if \[[e]\]{_t}
             [= Some None]}} *)
 
+    val map : ('a -> 'b) -> 'a option event -> 'b option event
+    (** [map f e] is [map Option.map e]. *)
+
     val bind : 'a option event -> ('a -> 'b option) -> 'b option event
-    (** [bind s f] is [map (fun v -> Option.bind v f) e]. *)
+    (** [bind e f] is [map (fun v -> Option.bind v f) e]. *)
   end
 
   (** Pair events. *)
@@ -486,6 +489,9 @@ module S : sig
         {- \[[value s ~default]\]{_t} [=]
            \[[default]\]{_t} if \[[s]\]{_t} [= None]}}
         [default]'s equality function is used for the resulting signal. *)
+
+    val map : ('a -> 'b) -> 'a option signal -> 'b option signal
+    (** [map f s] is [map Option.map s]. *)
 
     val bind : 'a option signal -> ('a -> 'b option) -> 'b option signal
     (** [bind s f] is [map (fun v -> Option.bind v f) s]. *)

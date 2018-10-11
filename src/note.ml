@@ -565,6 +565,8 @@ module E = struct
     let bind e f =
       let bind f = function None -> None | Some v -> f v in
       map (bind f) e
+
+    let map f e = map (function None -> None | Some v -> Some (f v)) e
   end
 
   module Pair = struct
@@ -860,6 +862,7 @@ module S = struct
       let bind f = function None -> None | Some v -> f v in
       map (bind f) s
 
+    let map f s = map (function None -> None | Some v -> Some (f v)) s
     let eq = _eq
   end
 
