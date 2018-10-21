@@ -419,7 +419,7 @@ module S : sig
       {- \[[delay i (lazy s)]\]{_ t} [=] [i] for t = 0. }
       {- \[[delay i (lazy s)]\]{_ t} [=] \[[s']\]{_t-dt} otherwise.}} *)
 
-  val fix : 'a -> ('a signal -> 'a signal * 'b) -> 'b
+  val fix : ?eq:('a -> 'a -> bool) -> 'a -> ('a signal -> 'a signal * 'b) -> 'b
   (** In [fix sf], [sf] is called with a signal [s] that represents
 
       the signal returned by [sf] delayed by an infinitesimal amount

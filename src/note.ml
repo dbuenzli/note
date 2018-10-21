@@ -94,7 +94,7 @@ and C : sig (* Cells *)
   val set_instant : Step.t -> 'a option t -> 'a option -> unit
 
   val delay :  'a -> 'a t Lazy.t -> 'a t
-  val fix :  'a -> ('a t -> 'a t * 'b) -> 'b
+  val fix : ?eq:('a -> 'a -> bool) -> 'a -> ('a t -> 'a t * 'b) -> 'b
   val dump_src_ids : Format.formatter -> 'a t -> unit
 end = struct
   type 'a t =
@@ -169,8 +169,8 @@ end = struct
     c
 
   let delay i z = failwith "TOOD"
-  let fix i cf =
-    let src = Src.create i in
+  let fix ?eq i cf =
+    let src = Src.create ?eq i in
     let src = Src.V src and d = Src.cell src in
     let c, r = cf d in
     let c_update = c.update in
