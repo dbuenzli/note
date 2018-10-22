@@ -1,15 +1,15 @@
-opam-version: "1.2"
+opam-version: "2.0"
 maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
 authors: ["The note programmers"]
 homepage: "http://erratique.ch/software/note"
 doc: "http://erratique.ch/software/note/doc"
 license: "ISC"
-dev-repo: "http://erratique.ch/repos/note.git"
+dev-repo: "git+http://erratique.ch/repos/note.git"
 bug-reports: "https://github.com/dbuenzli/note/issues"
-tags: []
-available: [ ocaml-version >= "4.03.0"]
+tags: [ "reactive" "declarative" "signal" "event" "frp" "org:erratique" ]
 depends:
 [
+  "ocaml" {>= "4.03.0"}
   "ocamlfind" {build}
   "ocamlbuild" {build}
   "topkg" {build & >= "0.9.0"}
