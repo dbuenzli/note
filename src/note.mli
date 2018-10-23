@@ -201,6 +201,12 @@ module E : sig
          if \[[next]\]{_t} [= Some _] and \[[next]\]{_<t} [= None].}
       {- \[[until ~limit ~next e]\]{_t} [= None] otherwise.}} *)
 
+  val follow : 'a event -> on:bool signal -> 'a event
+  (** [follow e ~on] is [e]'s occurences whenever [on] is [true].
+      {ul
+      {- \[[follow e ~on]\]{_t} [=] \[[e]\]{_t} if \[[on]\]{_t} [= true]}
+      {- \[[follow e ~on]\]{_t} [= None]  if \[[on]\]{_t} [= false]}} *)
+
   val fix : ('a event -> 'a event * 'b) -> 'b
   (** [fix ef] allows to refer to the value an event had an
       infinitesimal amount of time before.
@@ -379,7 +385,9 @@ module S : sig
   (** [sample_filter s on f] is [E.Option.on_some (sample s ~on f)]. *)
 
   val snapshot : 'b signal -> on:'a event -> 'b event
-  (** [snapshot ~on s] is [sample (fun v _ -> v) ~on s]. *)
+  (** [snapshot ~on s] is [sample (fun v _ -> v) ~on s].
+
+      {b TODO.} Candidate for deletion. *)
 
 (*
   val active : on:bool signal -> 'a signal -> 'a signal
@@ -411,6 +419,23 @@ module S : sig
       {- \[[until ~limit:true ~init ~next s]\]{_t} [=] \[[s]\]{_t'}
          if \[[next]\]{_t'} [= Some _] and \[[next]\]{_<t'} [= None].}}
       [init] defaults to [value s]. *)
+
+  val follow : ?init:'a -> 'a signal -> on:bool signal -> 'a signal
+  (** [follow ~init s ~on] is [s] whenever [on] is [true] and the last
+      value of [s] when [on] was [true] if [on] is [false]. If [on] is
+      [false] at creation time [init] is used (defaults to [S.value
+      s]).
+      {ul
+      {- \[[follow ~init s ~on]\]{_0} [=] \[[s]\]{_0}
+         if \[[on]\]{_0} [= true]}
+      {- \[[follow ~init s ~on]\]{_0} [=] \[[init]\]{_0}
+         if \[[on]\]{_0} [= false]}
+      {- \[[follow ~init s ~on]\]{_t} [=] \[[s]\]{_t}
+         if \[[on]\]{_t} [= true]}
+      {- \[[follow ~init s ~on]\]{_t} [=] \[[follow ~init s ~on]\]{_t'}
+         if \[[on]\]{_t} [= false] where t' is the
+         greatest t' < t with \[[on]\]{_t'} [= true] or [0] if there
+         is no such time.}} *)
 
   val delay : 'a -> 'a signal Lazy.t -> 'a signal
   (** [delay i (lazy s)] is the value [s] had an infinitesimal amount

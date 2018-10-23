@@ -537,6 +537,24 @@ module E = struct
         let init = if limit then C.value e else None in
         C.create_instant ~step ~srcs:Srcs.empty init ~update:nop
 
+  let follow e ~on =
+    (* FIXME rewrite combinators with this style.
+       FIXME determine why we don't simply call update for init in general *)
+    let deps_srcs e on = Srcs.union (C.srcs e) (C.srcs on) in
+    let deps_srcs_changed e on = C.(srcs_changed e || srcs_changed on) in
+    let update_deps step e on = C.(update step e; update step on) in
+    let follow e on = match e with Some _ as o when on -> o | _ -> None in
+    let update step self =
+      update_deps step e on;
+      if deps_srcs_changed e on then C.set_srcs self (deps_srcs e on);
+      C.set_instant step self (follow (C.value e) (C.value on))
+    in
+    let step = Src.find_active_step Step.nil (C.srcs e) in
+    let step = Src.find_active_step step (C.srcs on) in
+    let () = update_deps step e on in
+    let init = follow (C.value e) (C.value on) in
+    C.create_instant ~step ~srcs:(deps_srcs e on) init ~update
+
   let fix ef = C.fix None ef
 
   module Option = struct
@@ -746,7 +764,22 @@ module S = struct
         C.create ~eq:(eq s) ~step ~srcs (C.value s) ~update
     | Some _ ->
         let init = match init with None -> C.value s | Some i -> i in
-        C.create ~eq:(eq s)  ~step ~srcs:Srcs.empty init ~update:nop
+        C.create ~eq:(eq s) ~step ~srcs:Srcs.empty init ~update:nop
+
+  let follow ?init s ~on =
+    let deps_srcs s on = Srcs.union (C.srcs s) (C.srcs on) in
+    let deps_srcs_changed s on = C.(srcs_changed s || srcs_changed on) in
+    let update_deps step s on = C.(update step s; update step on) in
+    let update step self =
+      update_deps step s on;
+      if deps_srcs_changed s on then C.set_srcs self (deps_srcs s on);
+      if C.value on then C.set_value self (C.value s)
+    in
+    let step = Src.find_active_step Step.nil (C.srcs s) in
+    let step = Src.find_active_step step (C.srcs on) in
+    let () = update_deps step s on in
+    let init = match init with None -> (C.value s) | Some i -> i in
+    C.create ~eq:(eq s) ~step ~srcs:(deps_srcs s on) init ~update
 
   let delay = C.delay
   let fix = C.fix
