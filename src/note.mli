@@ -207,6 +207,13 @@ module E : sig
       {- \[[follow e ~on]\]{_t} [=] \[[e]\]{_t} if \[[on]\]{_t} [= true]}
       {- \[[follow e ~on]\]{_t} [= None]  if \[[on]\]{_t} [= false]}} *)
 
+  val defer : 'a event -> 'a event
+  (** [defer s] is [s] delayed by an infinitesimal amount of time.
+      At creation time [init] is used (defaults to [S.value s]).
+      {ul
+      {- \[[defer e]\]{_ t} [=] [None] for t = 0. }
+      {- \[[defer e]\]{_ t} [=] \[[e]\]{_t-dt} otherwise.}} *)
+
   val fix : ('a event -> 'a event * 'b) -> 'b
   (** [fix ef] allows to refer to the value an event had an
       infinitesimal amount of time before.
@@ -436,6 +443,13 @@ module S : sig
          if \[[on]\]{_t} [= false] where t' is the
          greatest t' < t with \[[on]\]{_t'} [= true] or [0] if there
          is no such time.}} *)
+
+  val defer : ?init:'a -> 'a signal -> 'a signal
+  (** [defer s] is [s] delayed by an infinitesimal amount of time.
+      At creation time [init] is used (defaults to [S.value s]).
+      {ul
+      {- \[[defer s]\]{_ t} [=] [init] for t = 0. }
+      {- \[[defer s]\]{_ t} [=] \[[s]\]{_t-dt} otherwise.}} *)
 
   val delay : 'a -> 'a signal Lazy.t -> 'a signal
   (** [delay i (lazy s)] is the value [s] had an infinitesimal amount

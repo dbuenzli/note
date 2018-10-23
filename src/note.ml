@@ -95,6 +95,7 @@ and C : sig (* Cells *)
 
   val delay :  'a -> 'a t Lazy.t -> 'a t
   val fix : ?eq:('a -> 'a -> bool) -> 'a -> ('a t -> 'a t * 'b) -> 'b
+  val defer : 'a -> 'a t -> 'a t
   val dump_src_ids : Format.formatter -> 'a t -> unit
 end = struct
   type 'a t =
@@ -187,6 +188,26 @@ end = struct
     let () = update step c in
     if step == Step.nil then Step.execute_delayed (Srcs.singleton src);
     r
+
+  let defer init c =
+    (** XXX do we really need a source for that. *)
+    let src = Src.create ~eq:c.eq init in
+    let src = Src.V src and d = Src.cell src in
+    let update step self =
+      if step == Step.delayed
+      then set_value self (value c)
+      else begin
+        C.(update step c);
+        if C.srcs_changed c then C.set_srcs d (C.srcs c);
+        if C.value_changed c then Step.add_delayed step src
+      end
+    in
+    d.update <- update;
+    let step = Src.find_active_step Step.nil (srcs c) in
+    let () = update step c in
+    let () = update step d in
+    if step == Step.nil then Step.execute_delayed (Srcs.singleton src);
+    d
 
   let dump_src_ids ppf c =
     Format.fprintf ppf "@[{%a}@]"
@@ -555,6 +576,7 @@ module E = struct
     let init = follow (C.value e) (C.value on) in
     C.create_instant ~step ~srcs:(deps_srcs e on) init ~update
 
+  let defer e = C.defer None e
   let fix ef = C.fix None ef
 
   module Option = struct
@@ -782,6 +804,16 @@ module S = struct
     C.create ~eq:(eq s) ~step ~srcs:(deps_srcs s on) init ~update
 
   let delay = C.delay
+  let defer ?init s =
+    let init = match init with
+    | Some init -> init
+    | None ->
+        let step = Src.find_active_step Step.nil (C.srcs s) in
+        let () = C.update step s in
+        C.value s
+    in
+    C.defer init s
+
   let fix = C.fix
   let l1 ?eq f x = map ?eq f x
   let l2 ?eq f x y =
