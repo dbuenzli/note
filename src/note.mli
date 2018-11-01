@@ -567,11 +567,11 @@ module S : sig
   (** Pair signals. *)
   module Pair : sig
 
-    val fst : ('a * 'b) signal -> 'a signal
-    (** [fst s] is [map fst s]. *)
+    val fst : ?eq:('a -> 'a -> bool) -> ('a * 'b) signal -> 'a signal
+    (** [fst ?eq s] is [map ?eq fst s]. *)
 
-    val snd : ('a * 'b) signal -> 'b signal
-    (** [snd e] is [map snd e]. *)
+    val snd : ?eq:('b -> 'b -> bool) -> ('a * 'b) signal -> 'b signal
+    (** [snd ?eq e] is [map ?eq snd e]. *)
 
     val v : 'a signal -> 'b signal -> ('a * 'b) signal
     (** [v s0 s1] is [l2 (fun x y -> (x, y) s0 s1]. *)

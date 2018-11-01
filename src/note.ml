@@ -906,8 +906,8 @@ module S = struct
   end
 
   module Pair = struct
-    let fst s = map fst s
-    let snd s = map snd s
+    let fst ?eq s = map ?eq fst s
+    let snd ?eq s = map ?eq snd s
     let v s0 s1 = l2 (fun x y -> (x, y)) s0 s1
   end
 
