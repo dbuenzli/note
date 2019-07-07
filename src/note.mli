@@ -1,12 +1,13 @@
 (*---------------------------------------------------------------------------
    Copyright (c) 2018 The note programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-(** Declarative events and signals for OCaml
+(** Declarative events and signals for OCaml.
 
-    {e %%VERSION%% — {{:%%PKG_HOMEPAGE%% }homepage}} *)
+    {b XXX.} The denotational semantics and notations are not
+    documented yet. But basically they are the same
+    as {!React}'s ones. *)
 
 (** {1 Note} *)
 
