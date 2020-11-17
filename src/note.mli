@@ -13,7 +13,7 @@
 
 (** Update steps.
 
-    Update steps allow to schedule {e simultaneous} primitive event occurence
+    Update steps allow to schedule {e simultaneous} primitive event occurrence
     and signal changes. *)
 module Step : sig
 
@@ -34,7 +34,7 @@ end
 (** Event and signal changes loggers.
 
     Loggers are the output interface of the reactive system. They
-    allow external entities to observe event occurences and signal
+    allow external entities to observe event occurrences and signal
     changes. *)
 module Logr : sig
 
@@ -93,20 +93,20 @@ type 'a event
 
 (** Events.
 
-    An event is a value with discrete occurences over time. *)
+    An event is a value with discrete occurrences over time. *)
 module E : sig
 
   (** {1:ev Events} *)
 
   type 'a t = 'a event
-  (** The type for events with occurences of type ['a]. *)
+  (** The type for events with occurrences of type ['a]. *)
 
   type 'a send = ?step:Step.t -> 'a -> unit
-  (** The type for functions sending event occurences of type ['a].
+  (** The type for functions sending event occurrences of type ['a].
       See {!create}. *)
 
   val obs : 'a t -> 'a option Logr.obs
-  (** [obs e] is an observation for [e]'s occurences. *)
+  (** [obs e] is an observation for [e]'s occurrences. *)
 
   val log : ?now:bool -> 'a event -> ('a -> unit) -> Logr.t option
   (** [log ?now e f] is [Some (Logr.(create ?now (const f $ obs e)))]
@@ -116,9 +116,9 @@ module E : sig
   (** [create ()] is a primitive event [e] and a [send] function.
       The function [send] is such that:
       {ul
-      {- [send v] generates an occurence [v] of [e] at the time it is
+      {- [send v] generates an occurrence [v] of [e] at the time it is
          called .}
-      {- [send ~step v] generates an occurence [v] of [e] at the time
+      {- [send ~step v] generates an occurrence [v] of [e] at the time
          [step]. The function should not be called again before [step]
          is {{!Step.execute}executed}.}}
       {b Warning.} [send] must not be used in the definition of signals
@@ -126,7 +126,7 @@ module E : sig
 
   val value : 'a event -> 'a option
   (** [value e] is the value of event [e] at call time. If this is [None]
-      the event has no occurence, if this is [Some v], the event occurs
+      the event has no occurrence, if this is [Some v], the event occurs
       with [v]. *)
 
   val never : 'a event
@@ -156,7 +156,7 @@ module E : sig
   (** [stamp e v] is [map e (fun _ -> v)] *)
 
   val filter : ('a -> bool) -> 'a event -> 'a event
-  (** [filter p e] are the occurences of [e] that satisfy [p].
+  (** [filter p e] are the occurrences of [e] that satisfy [p].
        {ul
        {- \[[filter p e]\]{_t} [= Some v] if \[[e]\]{_t} [= Some v] and
        [p v = true]}
@@ -169,7 +169,7 @@ module E : sig
       {- \[[filter_map fm e]\]{_t} [= None] otherwise.}} *)
 
   val select : 'a event list -> 'a event
-  (** [select el] is the occurences of every event in [el]. If more
+  (** [select el] is the occurrences of every event in [el]. If more
       than one event occurs simlutanously, the leftmost is taken
       and the other are lost:
       {ul
@@ -189,8 +189,8 @@ module E : sig
       {- \[[accum i e]\] [= None] otherwise.}} *)
 
   val until : ?limit:bool -> next:'a event -> 'b event -> 'b event
-  (** [until ~limit ~next e] is [e]'s occurences until [next]
-      occurs. At that point if [e] occurs simultaneously the occurence is
+  (** [until ~limit ~next e] is [e]'s occurrences until [next]
+      occurs. At that point if [e] occurs simultaneously the occurrence is
       discarded ([limit] is [false], default) or kept ([limit] is [true])
       and after this the event never occurs again.
       {ul
@@ -203,7 +203,7 @@ module E : sig
       {- \[[until ~limit ~next e]\]{_t} [= None] otherwise.}} *)
 
   val follow : 'a event -> on:bool signal -> 'a event
-  (** [follow e ~on] is [e]'s occurences whenever [on] is [true].
+  (** [follow e ~on] is [e]'s occurrences whenever [on] is [true].
       {ul
       {- \[[follow e ~on]\]{_t} [=] \[[e]\]{_t} if \[[on]\]{_t} [= true]}
       {- \[[follow e ~on]\]{_t} [= None]  if \[[on]\]{_t} [= false]}} *)
@@ -283,7 +283,7 @@ module E : sig
     (** [snd e] is [map snd e]. *)
 
     val v : 'a event -> 'b event -> ('a * 'b) event
-    (** [v e0 e1] pair simultaneous occurences of [e0] and [e1]:
+    (** [v e0 e1] pair simultaneous occurrences of [e0] and [e1]:
         {ul
         {- \[[v e0 e1]\]{_t} [= Some (v0, v1)] if \[[e0]\]{_t} [= Some v0]
            and \[[e1]\]{_t} [= Some v1]}
@@ -360,7 +360,7 @@ module S : sig
 
   val swap : 'a signal -> 'a signal event -> 'a signal
   (** [swap s se] is [join (hold ~eq:( == ) s se)] that is the values of
-      [s] followed by values of the last signal that occured on [se]. *)
+      [s] followed by values of the last signal that occurred on [se]. *)
 
   val changes : 'a signal -> 'a event
   (** [changes s] occurs with the value of [s] whenever it changes.
