@@ -210,16 +210,16 @@ let test_s_bool () =
   let a_zedge = bool_occs (S.Bool.(edge false')) [] in
   let a_zrise = unit_occs (S.Bool.(rise false')) [] in
   let a_zfall = unit_occs (S.Bool.(fall false')) [] in
-  let a_flip_never = bool_vals (S.Bool.flip false E.never) [false] in
-  let flip = S.Bool.flip true (S.changes s) in
+  let a_flip_never = bool_vals (S.Bool.flip ~init:false E.never) [false] in
+  let flip = S.Bool.flip ~init:true (S.changes s) in
   let a_flip = bool_vals flip [true; false; true] in
   let a_flip_edge = bool_occs (S.Bool.edge flip) [false; true] in
   let a_flip_rise = unit_occs (S.Bool.rise flip) [()] in
   let a_flip_fall = unit_occs (S.Bool.fall flip) [()] in
-  let dyn_flip = S.bind s (fun _ -> S.Bool.flip true (S.changes s)) in
+  let dyn_flip = S.bind s (fun _ -> S.Bool.flip ~init:true (S.changes s)) in
   let a_dyn_flip = bool_vals dyn_flip [true] in
   let changes = S.changes s in
-  let dyn_flip' = S.bind s (fun _ -> S.Bool.flip true changes) in
+  let dyn_flip' = S.bind s (fun _ -> S.Bool.flip ~init:true changes) in
   let a_dyn_flip' = bool_vals dyn_flip' [true; false] in
   List.iter set_s [1;2;2];
   List.iter empty [a_flip_never; a_flip; a_dyn_flip; a_dyn_flip'; a_zedge;

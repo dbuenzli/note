@@ -27,7 +27,7 @@ end = struct
   let id (V s) = s.id
   let cell s = s.cell
   let untyped s = s.self
-  let compare (V s) (V t) = (Pervasives.compare : int -> int -> int) s.id t.id
+  let compare (V s) (V t) = (Stdlib.compare : int -> int -> int) s.id t.id
   let logrs (V s) = s.logrs
   let add_logr logr (V s) = s.logrs <- logr :: s.logrs
   let rem_logr logr  (V s) =
@@ -861,7 +861,7 @@ module S = struct
       let update step self =
         C.update step s;
         if C.srcs_changed s then C.set_srcs self (C.srcs s);
-        if Pervasives.( && ) (C.value_changed s) (C.value s = edge)
+        if Stdlib.( && ) (C.value_changed s) (C.value s = edge)
         then C.set_instant step self (Some ())
       in
       let step = Src.find_active_step Step.nil (C.srcs s) in
@@ -876,12 +876,12 @@ module S = struct
         if C.srcs_changed e then C.set_srcs self (C.srcs e);
         match C.value e with
         | None -> ()
-        | Some _ -> C.set_value self (Pervasives.not (C.value self))
+        | Some _ -> C.set_value self (Stdlib.not (C.value self))
       in
       let step = Src.find_active_step Step.nil (C.srcs e) in
       let () = C.update step e in
       let init = match C.value e with
-      | Some _ -> Pervasives.not init
+      | Some _ -> Stdlib.not init
       | None -> init
       in
       C.create ~eq ~step ~srcs:(C.srcs e) init ~update
