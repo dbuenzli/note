@@ -1,22 +1,26 @@
 opam-version: "2.0"
+name: "note"
+synopsis: "Declarative events and signals for OCaml"
+description: """\
+Note is an OCaml library for functional reactive programming (FRP). It
+provides support to program with time varying values: declarative
+events and signals.
+
+Note is distributed under the ISC license.
+
+Homepage: http://erratique.ch/software/note"""
 maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
-authors: ["The note programmers"]
-homepage: "https://erratique.ch/software/note"
-doc: "https://erratique.ch/software/note/doc"
+authors: "The note programmers"
 license: "ISC"
-dev-repo: "git+https://erratique.ch/repos/note.git"
+tags: ["reactive" "declarative" "signal" "event" "frp" "org:erratique"]
+homepage: "https://erratique.ch/software/note"
+doc: "https://erratique.ch/software/note/doc/"
 bug-reports: "https://github.com/dbuenzli/note/issues"
-tags: [ "reactive" "declarative" "signal" "event" "frp" "org:erratique" ]
-depends:
-[
+depends: [
   "ocaml" {>= "4.08.0"}
   "ocamlfind" {build}
   "ocamlbuild" {build}
-  "topkg" {build & >= "0.9.0"}
+  "topkg" {build & >= "1.0.3"}
 ]
-depopts: []
-build:
-[[
-  "ocaml" "pkg/pkg.ml" "build"
-          "--dev-pkg" "%{dev}%"
-]]
+build: ["ocaml" "pkg/pkg.ml" "build" "--dev-pkg" "%{dev}%"]
+dev-repo: "git+https://erratique.ch/repos/note.git"

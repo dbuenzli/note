@@ -1,4 +1,4 @@
-PKG bytes
+PKG b0.kit
 S src
 S test
-B _build/**
+B _b0/**
