@@ -137,7 +137,7 @@ module E : sig
       the last event of [e]:
       {ul
       {- \[[bind e f]\]{_ t} [=] \[[f v]\]{_t} if \[[e]\]{_<=t} [= Some v].}
-      {- \[[bind e f]\]{_ t} [=] [never] if \[[e]\]{_<=t} [= None].}} *)
+      {- \[[bind e f]\]{_ t} [=] [never]{_t} if \[[e]\]{_<=t} [= None].}} *)
 
   val join : 'a event event -> 'a event
   (** [join ee] is [bind ee (fun e -> e)]. *)
