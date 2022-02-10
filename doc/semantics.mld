@@ -1,0 +1,55 @@
+{0 Semantics of events and signals}
+
+This following defines the semantics and notations used to give
+precise meaning to events and signals.
+
+It is important to note that when these notation are used to describe
+event or signal combinators, the origin of time t = 0 is {e always}
+fixed at the time at which the combinator creates the event or the
+signal and the semantics of the dependents is evaluated relative to
+this timeline.
+
+We use dt to denote an infinitesimal amount of time.
+
+{1:events Events}
+
+An event is a value with discrete occurrences over time.
+
+The semantic function \[\] [: 'a event -> time -> 'a option] gives
+meaning to an event [e] by mapping it to a function of time \[[e]\] [:
+time -> 'a option] returning [Some v] whenever the event occurs with
+value [v] and [None] otherwise. We write \[[e]\]{_t} the evaluation of
+this {e semantic} function at time t.
+
+As a shortcut notation we also define \[\]{_<t} [: 'a event -> 'a
+option] (resp. \[\]{_≤t}) to denote the last occurrence, if any, of
+an event before (resp. before or at) t. More precisely :
+
+{ul
+{- \[[e]\]{_<t} [=] \[[e]\]{_t'} with t' the greatest t' < t
+   (resp. ≤) such that \[[e]\]{_t'} [<> None].}
+{- \[[e]\]{_<t} [= None] if there is no such t'.}}
+
+{1:signals Signals}
+
+A signal is a value that varies continuously over time. In contrast to
+{{!events}events} which occur at specific point in time, a signal has
+a value at every point in time.
+
+The semantic function \[\] [: 'a signal -> time -> 'a] gives meaning
+to a signal [s] by mapping it to a function of time \[[s]\] [ : time
+-> 'a] that returns its value at a given time. We write \[[s]\]{_t}
+the evaluation of this {e semantic} function at time t.
+
+{2:equality Equality}
+
+Most signal combinators have an optional [eq] parameter that defaults
+to structural equality {!Stdlib.( = )}. [eq] specifies the equality
+function used to detect changes in the value of the resulting signal.
+
+{2:continuity Continuity}
+
+Ultimately signal updates depend on primitives updates. Thus a signal
+can only approximate a real continuous signal. The accuracy of the
+approximation depends on the variation rate of the real signal and the
+primitive's update frequency.

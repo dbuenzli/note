@@ -3,11 +3,8 @@
    Distributed under the ISC license, see terms at the end of the file.
   ---------------------------------------------------------------------------*)
 
-(** Declarative events and signals for OCaml.
+(** Declarative events and signals for OCaml. *)
 
-    {b XXX.} The denotational semantics and notations are not
-    documented yet. But basically they are the same
-    as {!React}'s ones. *)
 
 (** {1 Note} *)
 
@@ -93,7 +90,9 @@ type 'a event
 
 (** Events.
 
-    An event is a value with discrete occurrences over time. *)
+    An event is a value with discrete occurrences over time.
+    Consult the {{!page-semantics.events}semantics and notations} of
+    events. *)
 module E : sig
 
   (** {1:ev Events} *)
@@ -136,8 +135,8 @@ module E : sig
   (** [bind e f] is the event that results from applying [f] to
       the last event of [e]:
       {ul
-      {- \[[bind e f]\]{_ t} [=] \[[f v]\]{_t} if \[[e]\]{_<=t} [= Some v].}
-      {- \[[bind e f]\]{_ t} [=] [never]{_t} if \[[e]\]{_<=t} [= None].}} *)
+      {- \[[bind e f]\]{_ t} [=] \[[f v]\]{_t} if \[[e]\]{_≤t} [= Some v].}
+      {- \[[bind e f]\]{_ t} [=] [never]{_t} if \[[e]\]{_≤t} [= None].}} *)
 
   val join : 'a event event -> 'a event
   (** [join ee] is [bind ee (fun e -> e)]. *)
@@ -195,7 +194,7 @@ module E : sig
       and after this the event never occurs again.
       {ul
       {- \[[until ~limit ~next e]\]{_t} [=] \[[e]\]{_t}
-         if \[[next]\]{_<=t} [= None]}
+         if \[[next]\]{_≤t} [= None]}
       {- \[[until ~limit:false ~next e]\]{_t} [= None]
          if \[[next]\]{_t} [= Some _] and \[[next]\]{_<t} [= None].}
       {- \[[until ~limit:true ~next e]\]{_t} [=] \[[e]\]{_t}
@@ -297,8 +296,8 @@ end
 
 (** Signals.
 
-    A signal is a value that varies continuously over time. It has
-    a value at every point in time. *)
+    A signal is a value that varies continuously over time. Consult
+    the {!page-semantics.signals}semantics and notations} of signals. *)
 module S : sig
 
   (** {1:sig Signals} *)
@@ -348,8 +347,8 @@ module S : sig
       value of [i] provides the signal value at creation time if
       there's no event at that time.
       {ul
-      {- \[[hold i e]\]{_t} [= i] if \[[e]\]{_<=t} [= None]}
-      {- \[[hold i e]\]{_t} [= v] if \[[e]\]{_<=t} [= Some v]}} *)
+      {- \[[hold i e]\]{_t} [= i] if \[[e]\]{_≤t} [= None]}
+      {- \[[hold i e]\]{_t} [= v] if \[[e]\]{_≤t} [= Some v]}} *)
 
   val bind : 'a signal -> ('a -> 'b signal) -> 'b signal
   (** [bind s f] is the signal that results from applying [f] to
@@ -419,7 +418,7 @@ module S : sig
       or whenever [next] occurs ([limit] is [true]) is kept forever.
       {ul
       {- \[[until ~limit ~init ~next s]\]{_t} [=] \[[s]\]{_t}
-         if \[[next]\]{_<=t} [= None]}
+         if \[[next]\]{_≤t} [= None]}
       {- \[[until ~limit ~init ~next s]\]{_t}
          [= init] if \[[next]\]{_0} [= Some _]}
       {- \[[until ~limit:false ~init ~next s]\]{_t} [=] \[[s]\]{_t'- dt}
@@ -517,7 +516,7 @@ module S : sig
         [e] occurs. [init] provides the signal value at creation time.
           {ul
           {- \[[flip b e]\]{_0} [= not b] if \[[e]\]{_0} [= Some _]}
-          {- \[[flip b e]\]{_t} [=] init if \[[e]\]{_<=t} [= None]}
+          {- \[[flip b e]\]{_t} [=] init if \[[e]\]{_≤t} [= None]}
           {- \[[flip b e]\]{_t} [=] [not] \[[flip b e]\]{_t-dt}
              if \[[e]\]{_t} [= Some _]}} *)
   end
@@ -534,7 +533,7 @@ module S : sig
         [i] if there was no such value:
         {ul
         {- \[[hold_some i s]\]{_t} [= i] if \[[s]\]{_<t} [= None]}
-        {- \[[hold_some i s]\]{_t} [= v] if \[[s]\]{_<=t} [= Some v]}}
+        {- \[[hold_some i s]\]{_t} [= v] if \[[s]\]{_≤t} [= Some v]}}
         Uses [s]'s equality on [Some _]. *)
 
     (** {1:lift Lifted {!Stdlib.Option} module} *)
