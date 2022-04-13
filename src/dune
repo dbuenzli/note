@@ -1,0 +1,5 @@
+(library
+ (name note)
+ (public_name note)
+ (flags :standard -w -27-32-50)
+ (wrapped false))

@@ -13,14 +13,11 @@ maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
 authors: "The note programmers"
 license: "ISC"
 tags: ["reactive" "declarative" "signal" "event" "frp" "org:erratique"]
-homepage: "https://erratique.ch/software/note"
-doc: "https://erratique.ch/software/note/doc/"
+homepage: "https://github.com/dune-universe/notes.git"
 bug-reports: "https://github.com/dbuenzli/note/issues"
 depends: [
   "ocaml" {>= "4.08.0"}
-  "ocamlfind" {build}
-  "ocamlbuild" {build}
-  "topkg" {build & >= "1.0.3"}
+  "dune"
 ]
-build: ["ocaml" "pkg/pkg.ml" "build" "--dev-pkg" "%{dev}%"]
-dev-repo: "git+https://erratique.ch/repos/note.git"
+build: [ "dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} ]
+dev-repo: "git+https://github.com/dune-universe/note.git"
