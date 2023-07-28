@@ -1,3 +1,9 @@
+
+
+- Add the `note.brr` experimental library. This used to be `brr.note`
+  in `brr`. The toplevel modules have been renamed from `Brr_note*` to
+  `Note_brr*`. `brr` becomes an optional dependency of `note`.
+
 v0.0.2 2022-02-10
 -----------------
 

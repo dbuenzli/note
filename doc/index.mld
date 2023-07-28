@@ -10,4 +10,15 @@ The semantics of events and signals is described in
 {b WARNING.} This package is experimental, it's documentation is
 subpar and the interfaces will likely change in the future.
 
+{1:note_library [note] library}
+
 {!modules: Note}
+
+{1:note_brr_library [note.brr] library}
+
+This library has the reactive infrastructure for browsers and
+a few higher-level APIs.
+
+{b Experimental, will break in the future}.
+
+{!modules: Note_brr Note_brr_kit Note_brr_legacy}

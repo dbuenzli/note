@@ -2,5 +2,9 @@ true : bin_annot, safe_string
 
 <_b0> : -traverse
 <src> : include
+
+<src/brr> : include
+<src/brr/**> : package(brr)
+
 <test> : include
 <test/clock*> : package(unix)

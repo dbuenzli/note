@@ -5,3 +5,14 @@ archive(byte) = "note.cma"
 archive(native) = "note.cmxa"
 plugin(byte) = "note.cma"
 plugin(native) = "note.cmxs"
+
+package "brr" (
+  directory = "brr"
+  description = "Brr Note support"
+  version = "%%VERSION_NUM%%"
+  requires = "note brr"
+  archive(byte) = "note_brr.cma"
+  archive(native) = "note_brr.cmxa"
+  plugin(byte) = "note_brr.cma"
+  plugin(native) = "note_brr.cmxs"
+)

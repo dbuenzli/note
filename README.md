@@ -6,30 +6,48 @@ Note is an OCaml library for functional reactive programming (FRP). It
 provides support to program with time varying values: declarative
 events and signals.
 
+Note also has (optional and experimental) support for reactive browser
+programming with the [brr] library.
+
 Note is distributed under the ISC license.
 
-Homepage: http://erratique.ch/software/note  
+Homepage: <http://erratique.ch/software/note>  
+
+[brr]: https://erratique.ch/software/brr
 
 ## Installation
 
 Note can be installed with `opam`:
 
     opam install note
+    opam install note brr  # For the browser support
 
 If you don't use `opam` consult the [`opam`](opam) file for build
 instructions.
 
 ## Documentation
 
-The documentation and API reference is generated from the source
-interfaces. It can be consulted [online][doc] or via `odig doc
-note`.
+The documentation can be consulted [online] or via `odig doc note`.
 
-[doc]: http://erratique.ch/software/note/doc
+Questions are welcome but better asked on the [OCaml forum] than on 
+the issue tracker.
+
+[online]: http://erratique.ch/software/note/doc
+[OCaml forum]: https://discuss.ocaml.org/
+
+## Sample programs 
+
+An implementation of the [TodoMVC] application with `note.brr` is
+in [todomvc.ml](test/todomvc.ml).
+
+You can run it with `b0 -- todomvc` see also `b0 list` for other 
+tests to run.
+
+[TodoMVC]: http://todomvc.com/
 
 ## History
 
-Note is a *potential* successor to the OCaml [React][react] library.
+Note is a *potential* successor to the OCaml [React] library.
 
 On the plus side:
 
@@ -74,4 +92,4 @@ On the unknown side:
   it might be needed. The latter brings API usability improvements,
   e.g. the sound and safe implementation of `{E,S}.value` in Note.
   
-[react]: http://erratique.ch/software/react
+[React]: http://erratique.ch/software/react
