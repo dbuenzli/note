@@ -1,5 +1,5 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2018 The brr programmers. All rights reserved.
+   Copyright (c) 2018 The note programmers. All rights reserved.
    SPDX-License-Identifier: ISC
   ---------------------------------------------------------------------------*)
 
