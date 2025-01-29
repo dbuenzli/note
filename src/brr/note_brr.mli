@@ -6,7 +6,7 @@
 (** Infrastructure for reactive browser interaction.
 
     This is the low-level infrastructure to enable reactive
-    browser programming. See {!Brr_note_kit} for more fancy stuff. *)
+    browser programming. See {!Note_brr_kit} for more fancy stuff. *)
 
 open Note
 open Brr
