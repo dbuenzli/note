@@ -25,7 +25,7 @@ let test_exe ?(requires = []) src ~doc =
   let srcs = [`File src] in
   let meta = B0_meta.empty |> B0_meta.(tag test) in
   let requires = note :: requires in
-  B0_ocaml.exe (Fpath.basename ~strip_exts:true src) ~srcs ~doc ~meta ~requires
+  B0_ocaml.exe (Fpath.basename ~drop_exts:true src) ~srcs ~doc ~meta ~requires
 
 let test = test_exe ~/"test/test.ml" ~doc:"Test suite"
 let clock =
