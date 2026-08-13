@@ -25,7 +25,7 @@ let test_exe ?(requires = []) src ~doc =
   let srcs = [`File src] in
   let meta = B0_meta.empty |> B0_meta.(tag test) in
   let requires = note :: requires in
-  B0_ocaml.exe (Fpath.basename ~drop_exts:true src) ~srcs ~doc ~meta ~requires
+  B0_ocaml.exe (Filepath.basename ~drop_exts:true src) ~srcs ~doc ~meta ~requires
 
 let test = test_exe ~/"test/test.ml" ~doc:"Test suite"
 let clock =
@@ -41,7 +41,7 @@ let test_jsoo_module ?doc top m requires  =
   | None -> Fmt.str "Test %s.%s module" top m | Some doc -> doc
   in
   let test = Fmt.str "test_%s" (String.Ascii.uncapitalize m) in
-  let srcs = `File (Fpath.v (Fmt.str "test/%s.ml" test)) :: test_assets in
+  let srcs = `File (Filepath.v (Fmt.str "test/%s.ml" test)) :: test_assets in
   let meta =
     B0_meta.empty
     |> B0_meta.add B0_jsoo.compile_opts Cmd.(arg "--pretty")
